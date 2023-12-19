@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { Unauthorized } from "../errors/Errors";
 import db from "../db";
 import { TABLE_NAMES } from "../constants";

@@ -35,20 +35,9 @@ app.get("/", async (req, res) => {
 });
 
 // start of routes
-app.use("/api/employees", require("./controllers/EmployeeController").default);
-app.use("/api/sources", require("./controllers/SourceController").default);
-app.use("/api/teams", require("./controllers/TeamController").default);
-app.use(
-  "/api/projecttypes",
-  require("./controllers/ProjectTypeController").default
-);
-app.use(
-  "/api/projectstatus",
-  require("./controllers/ProjectStatusController").default
-);
-app.use("/api/leads", require("./controllers/LeadController").default);
-app.use("/api/saletasks", require("./controllers/SaleTaskController").default);
-app.use("/api/leadstatus", require("./controllers/LeadController").default);
+app.use("/api/v1/users", require("./controllers/UserController").default);
+// app.use("/api/notebooks", require("./controllers/PageController").default);
+// app.use("/api/pages", require("./controllers/NotebookController").default);
 
 // handling errors thrown in the controllers and sending them as response
 app.use(ErrorHandler);
