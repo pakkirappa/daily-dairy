@@ -2,11 +2,14 @@ import { Router, Request, Response } from "express";
 import asyncHandler from "../middleware/AsyncHandler";
 import { JwtDao, LoginDto, RegisterDto } from "../constants/types";
 import {
+  createPageValidator,
   createUserValidator,
+  getPageValidator,
   idValidater,
+  updatePageValidator,
   userLoginValidater,
 } from "../lib/Validations";
-import { dbUpdate, validate } from "../middleware/Validator";
+import { dbDelete, dbUpdate, validate } from "../middleware/Validator";
 import db from "../db";
 import { PRC_NAMES, TABLE_NAMES } from "../constants";
 import jwt from "jsonwebtoken";
@@ -19,19 +22,19 @@ const router = Router();
 // creating the user
 router.post(
   "/",
-  validate(createUserValidator),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { name, email, username } = req.body as RegisterDto;
-    let { password } = req.body as RegisterDto;
+  validate(createPageValidator),
+  asyncHandler(async (req: any, res: Response) => {
+    const { content, notebook_id } = req.body as {
+      content: string;
+      notebook_id: number;
+    };
 
-    // creating the user
-    // p_name, p_username,p_email, p_password
-    password = await bcrypt.hash(password, 10);
-    const [[{ result, code }]] = await db.query(PRC_NAMES.ADD_USER, [
-      name,
-      username,
-      email,
-      password,
+    // creating the page
+    // p_user_id,p_notebook_id, p_content
+    const [[{ result, code }]] = await db.query(PRC_NAMES.ADD_PAGE, [
+      req.user.id,
+      notebook_id,
+      content,
     ]);
 
     if (Number(code) === 400) {
@@ -45,66 +48,58 @@ router.post(
   })
 );
 
-// creating the user
-router.post(
-  "/login",
-  validate(userLoginValidater),
+router.get(
+  "/",
+  validate(getPageValidator),
   asyncHandler(async (req: Request, res: Response) => {
-    const { password, username } = req.body as LoginDto;
-    // login the user
-    // p_username, p_password
-    const [user] = await db.query(
-      `SELECT * FROM ${TABLE_NAMES.USERS} WHERE username = ? OR email = ?`,
-      [username, username]
+    const { notebook_id } = req.query as { notebook_id: string };
+
+    const pages = await db.query(
+      `SELECT id,content FROM ${TABLE_NAMES.PAGES} WHERE notebook_id = ?`,
+      [notebook_id]
     );
 
-    if (!user) {
-      throw new NotFound(`User with username or email ${username} not found`);
-    }
-
-    const isPasswordSame = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordSame) {
-      throw new BadRequest("Invalid Password");
-    }
-
-    await db.query(`UPDATE ${TABLE_NAMES.USERS} SET last_login = NOW()`);
-
-    const payLoad = {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-    } as JwtDao;
-
-    const token = jwt.sign(payLoad, CONFIG.JWT_SECRET, {
-      expiresIn: "1d",
-      issuer: CONFIG.JWT_ISSUER,
-    });
-
-    // sending the response
-    res
-      .cookie("authorization", "Bearer " + token, {
-        httpOnly: true,
-        expires: new Date(Date.now() + 86400000), // 1 day
-      })
-      .json({
-        msg: `Welcome ${user.name} , you have successfully logged in`,
-        token,
-      });
+    // sending the response as json
+    res.json(pages);
   })
 );
 
-router.get(
+router.patch(
   "/:id",
   validate(idValidater),
+  validate(updatePageValidator),
   asyncHandler(async (req: Request<{ id: number }>, res: Response) => {
     const { id } = req.params;
+    const { content } = req.body;
 
     // creating the user
-    const [user] = await db.query(PRC_NAMES.GET_USER_BY_ID, [id]);
+    // p_page_id, p_content
+    const [[{ result, code }]] = await db.query(PRC_NAMES.UPDATE_PAGE, [
+      id,
+      content,
+    ]);
+
+    if (Number(code) === 400) {
+      throw new BadRequest(result);
+    }
 
     // sending the response
-    res.json(user);
+    res.json({
+      msg: result,
+    });
   })
 );
+
+router.delete(
+  "/:id",
+  validate(idValidater),
+  dbDelete(TABLE_NAMES.PAGES),
+  asyncHandler(async (req: Request<{ id: number }>, res: Response) => {
+    // sending the response
+    res.json({
+      msg: "Page deleted successfully",
+    });
+  })
+);
+
 export default router;

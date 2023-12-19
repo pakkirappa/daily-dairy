@@ -7,7 +7,7 @@ import {
   idValidater,
   updateNoteBookValidator,
 } from "../lib/Validations";
-import { validate } from "../middleware/Validator";
+import { dbDelete, validate } from "../middleware/Validator";
 import db from "../db";
 import { PRC_NAMES, TABLE_NAMES } from "../constants";
 import { BadRequest, NotFound } from "../errors/Errors";
@@ -91,26 +91,11 @@ router.patch(
 router.delete(
   "/:id",
   validate(idValidater),
+  dbDelete(TABLE_NAMES.NOTEBOOKS),
   asyncHandler(async (req: any, res: Response) => {
-    const { name } = req.body as { name: string };
-
-    const { id } = req.params as { id: string };
-
-    // creating the user
-    // p_user_id,p_notebook_id,p_name
-    const [[{ result, code }]] = await db.query(PRC_NAMES.UPDATE_NOTEBOOK, [
-      req.user.id,
-      id,
-      name,
-    ]);
-
-    if (Number(code) === 400) {
-      throw new BadRequest(result);
-    }
-
     // sending the response
     res.json({
-      msg: result,
+      msg: "Notebook Deleted Successfully",
     });
   })
 );

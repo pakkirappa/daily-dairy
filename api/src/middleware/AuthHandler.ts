@@ -1,10 +1,13 @@
 import { NextFunction, Response } from "express";
 import { Unauthorized } from "../errors/Errors";
 import db from "../db";
-import { PRC_NAMES, TABLE_NAMES } from "../constants";
+import { PRC_NAMES } from "../constants";
 import jwt from "jsonwebtoken";
 import { JwtDao } from "../constants/types";
 import CONFIG from "../config";
+
+const LOGIN_URL = "/api/v1/users/login";
+const REGISTER_URL = "/api/v1/users/";
 
 /**
  * @description This middleware is used to authenticate the subAdmin
@@ -19,8 +22,8 @@ export default async function authHandler(
 ) {
   try {
     if (
-      req.url.includes("login") ||
-      (req.url.includes("users") && req.method === "POST")
+      req.url === LOGIN_URL ||
+      (req.url === REGISTER_URL && req.method === "POST")
     ) {
       return next();
     }

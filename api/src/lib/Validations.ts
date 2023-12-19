@@ -79,7 +79,11 @@ export const updateNoteBookValidator = [
 ];
 
 export const createPageValidator = [
-  body("content").optional().isString().withMessage("Content must be a string"),
+  body("content")
+    .notEmpty()
+    .withMessage("Content Is Required")
+    .isString()
+    .withMessage("Content must be a string"),
   body("notebook_id")
     .notEmpty()
     .withMessage("Notebook Id must not be empty")
@@ -88,12 +92,11 @@ export const createPageValidator = [
 ];
 
 export const updatePageValidator = [
-  body("content").optional().isString().withMessage("Content must be a string"),
-  body("notebook_id")
+  body("content")
     .notEmpty()
-    .withMessage("Notebook Id must not be empty")
-    .isInt()
-    .withMessage("Notebook Id must be a number"),
+    .withMessage("Content must not be empty")
+    .isString()
+    .withMessage("Content must be a string"),
 ];
 
 export const idValidater = [

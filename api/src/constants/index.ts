@@ -18,7 +18,7 @@ export const TABLE_NAMES = {
 
 export const PRC_NAMES = {
   ADD_NOTEBOOK: "CALL PRC_ADD_NOTEBOOK(?,?)", // p_name, p_user_id
-  ADD_PAGE: "CALL PRC_ADD_PAGE(?,?,?)", // p_notebook_id, p_content
+  ADD_PAGE: "CALL PRC_ADD_PAGE(?,?,?)", // p_user_id, p_notebook_id, p_content
   ADD_USER: "CALL PRC_ADD_USER(?,?,?,?)", // p_name, p_username,p_email, p_password
   UPDATE_NOTEBOOK: "CALL PRC_UPDATE_NOTEBOOK(?,?,?)", // p_user_id,p_notebook_id,p_name
   UPDATE_PAGE: "CALL PRC_UPDATE_PAGE(?,?)", // p_page_id, p_content

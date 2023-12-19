@@ -94,6 +94,51 @@ router.post(
   })
 );
 
+// updating the user
+router.patch(
+  "/:id",
+  validate(idValidater),
+  dbUpdate(TABLE_NAMES.USERS),
+  asyncHandler(async (req: Request<{ id: number }>, res: Response) => {
+    const { id } = req.params;
+
+    const keys = Object.keys(req.body);
+    const keysCanUpdate = ["name", "email"];
+
+    if (keys.length === 0) {
+      throw new BadRequest("No data to update");
+    }
+
+    if (!keys.every((key) => keysCanUpdate.includes(key))) {
+      throw new BadRequest("Invalid data to update");
+    }
+
+    let sql = `UPDATE ${TABLE_NAMES.USERS} SET `;
+
+    // changing the name
+    if (req.body.name) {
+      sql += `name = '${req.body.name}'`;
+    }
+
+    // changing the email
+    if (req.body.email) {
+      if (sql.includes("username")) {
+        sql += `,email = '${req.body.email}'`;
+      }
+    }
+
+    sql += ` WHERE id = ${id}`;
+
+    await db.transaction(async (manager) => {
+      await manager.query(sql);
+    });
+
+    res.json({
+      msg: "User updated successfully",
+    });
+  })
+);
+
 router.get(
   "/:id",
   validate(idValidater),
