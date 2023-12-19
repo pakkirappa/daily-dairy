@@ -1,7 +1,10 @@
 import { NextFunction, Response } from "express";
 import { Unauthorized } from "../errors/Errors";
 import db from "../db";
-import { TABLE_NAMES } from "../constants";
+import { PRC_NAMES, TABLE_NAMES } from "../constants";
+import jwt from "jsonwebtoken";
+import { JwtDao } from "../constants/types";
+import CONFIG from "../config";
 
 /**
  * @description This middleware is used to authenticate the subAdmin
@@ -9,28 +12,46 @@ import { TABLE_NAMES } from "../constants";
  * and will check if the token is valid or not and will add the subAdmin details
  * to the request object if the token is valid and will pass the request to the next middleware
  */
-export const userController = async (
+export default async function authHandler(
   req: any,
   res: Response,
   next: NextFunction
-) => {
-  const { authorization } = req.cookies;
-  if (!authorization)
-    throw new Unauthorized(`Authorization header is required`);
-  const token = authorization.split(" ")[1];
-  if (!token) throw new Unauthorized(`Token is required`);
+) {
+  try {
+    if (
+      req.url.includes("login") ||
+      (req.url.includes("users") && req.method === "POST")
+    ) {
+      return next();
+    }
 
-  const decoded = { id: 1 };
+    const { authorization } = req.cookies;
 
-  const [user] = await db.query(
-    `SELECT * FROM ${TABLE_NAMES.USERS} WHERE id = ?`,
-    [decoded.id]
-  );
-  if (!user)
-    throw new Unauthorized(
-      `No User found with this token , please login again`
-    );
+    if (!authorization) {
+      throw new Unauthorized(`Authorization is required in cookies`);
+    }
 
-  req.user = user;
-  next();
-};
+    const token = authorization.split(" ")[1];
+
+    if (!token) {
+      throw new Unauthorized(`Token is required`);
+    }
+
+    const decoded = jwt.verify(token, CONFIG.JWT_SECRET) as JwtDao;
+
+    const [[user]] = await db.query(PRC_NAMES.GET_USER_BY_ID, [decoded.id]);
+
+    if (!user) {
+      throw new Unauthorized(
+        `No User found with this token , please login again`
+      );
+    }
+
+    req.user = user;
+    next();
+  } catch (error: any) {
+    res.status(401).json({
+      msg: error.message,
+    });
+  }
+}

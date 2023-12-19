@@ -9,3 +9,11 @@ export type RegisterDto = {
   email: string;
   name: string;
 };
+
+export type JwtDao = {
+  id: number;
+  username: string;
+  name: string;
+  max_notebooks: number;
+  max_pages: number;
+};

@@ -4,12 +4,15 @@ import CONFIG from "./config";
 import cors from "cors";
 import morgan from "morgan";
 import db from "./db";
-import ErrorHandler from "./middleware/ErrorHandler";
+import errorHandler from "./middleware/ErrorHandler";
+import authHandler from "./middleware/AuthHandler";
+import cookieParser from "cookie-parser";
 
 const app = express(); // creating an express app
 
 app.use(express.json()); // parsing the request body into json
 app.use(cors()); // enabling cors
+app.use(cookieParser()); // parsing the cookies
 app.use(morgan("dev")); //logging the requests in the console
 
 async function init() {
@@ -34,10 +37,21 @@ app.get("/", async (req, res) => {
   });
 });
 
+app.use(authHandler);
+
 // start of routes
 app.use("/api/v1/users", require("./controllers/UserController").default);
-// app.use("/api/notebooks", require("./controllers/PageController").default);
-// app.use("/api/pages", require("./controllers/NotebookController").default);
+app.use(
+  "/api/v1/notebooks",
+  require("./controllers/NoteBookController").default
+);
+app.use("/api/v1/pages", require("./controllers/PageController").default);
+
+app.use("*", (req, res) => {
+  res.status(404).json({
+    message: "Please check the route that you are trying to access",
+  });
+});
 
 // handling errors thrown in the controllers and sending them as response
-app.use(ErrorHandler);
+app.use(errorHandler);

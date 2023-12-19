@@ -9,6 +9,8 @@ const CONFIG = {
   PRODUCTION: process.env.NODE_ENV === "production",
   // DB_SYNC: true,
   DB_POOL_SIZE: parseInt(process.env.DB_POOL_SIZE || "10"),
+  JWT_SECRET: process.env.JWT_SECRET || "daily_dairy",
+  JWT_ISSUER: process.env.JWT_ISSUER || "daily_dairy",
 };
 
 export default CONFIG;
