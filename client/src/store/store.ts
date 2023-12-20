@@ -1,7 +1,5 @@
 import { atom } from "jotai";
+import { User } from "../constants/types";
 
-type UserStore = {
-  id: string;
-};
 
-export const userAtom = atom<UserStore>({ id: "" });
+export const userAtom = atom<User>({ id: 0 });
