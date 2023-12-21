@@ -36,32 +36,37 @@ class Login extends StatelessWidget {
                 children: [
                   TextFormField(
                     controller: username,
-                    decoration: InputDecoration(hintText: "UserName"),
+                    decoration: const InputDecoration(hintText: "UserName"),
                   ),
                   TextFormField(
                     controller: password,
                     obscureText: true,
-                    decoration: InputDecoration(hintText: "Password"),
+                    decoration: const InputDecoration(hintText: "Password"),
                   )
                 ],
               )),
           ElevatedButton(
-              onPressed: () {
-                String usernamevalue = username.text;
-                String passwordvalue = password.text;
-                if (usernamevalue.isNotEmpty && passwordvalue.isNotEmpty) {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Notebook()));
-                } else {
-                  showDialog(
-                      context: context,
-                      builder: (context) => const AlertDialog(
-                            title: Text("Error"),
-                            content: Text("Enter Valcid details"),
-                          ));
-                }
-              },
-              child: Text("Submit"))
+            onPressed: () {
+              String usernamevalue = username.text;
+              String passwordvalue = password.text;
+              if (usernamevalue.isNotEmpty && passwordvalue.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Notebook(),
+                  ),
+                );
+              } else {
+                showDialog(
+                    context: context,
+                    builder: (context) => const AlertDialog(
+                          title: Text("Error"),
+                          content: Text("Enter Valcid details"),
+                        ));
+              }
+            },
+            child: const Text("Submit"),
+          )
         ],
       )),
     );
